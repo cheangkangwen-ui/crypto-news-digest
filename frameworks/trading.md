@@ -27,6 +27,40 @@ Take 1-4% risk on the trade — rate the trade confidence out of 10 and assign r
 
 RV trades depend on mean reversion and also the volatility of the spread, plus the absence of structural changes. Sometimes if it is just one leg that is dislocated, RV may not be necessary.
 
+### Perpetual Funding Rate — Cost of Carry for Perps
+
+Perpetual futures have no expiry (unlike CME quarterlies — no rolling needed). The funding rate is a periodic payment (typically every 1-8 hours; Hyperliquid pays hourly) exchanged directly between longs and shorts to keep the perp price tethered to spot.
+
+- Perp trades above spot (more demand from longs) → longs pay shorts. Funding is positive.
+- Perp trades below spot (more demand from shorts) → shorts pay longs. Funding is negative.
+- The exchange doesn't take this fee — it's a peer-to-peer transfer. Mechanically it's the perp market's version of "cost of carry" in traditional futures.
+
+**Why funding eats RV pair trades specifically:**
+A single directional trade pays or receives funding on one leg. A pair trade pays or receives on both legs simultaneously, and the signs usually don't cancel cleanly.
+
+Example — Long BTC / Short ETH pair:
+- Long BTC leg: you pay funding (crypto perps are structurally biased long — retail prefers the long side, so funding is positive most of the time, historically ~5-15% annualized on BTC).
+- Short ETH leg: you receive funding.
+- Net: roughly washes if BTC and ETH funding are similar.
+
+Example — Long altcoin / Short altcoin pair:
+- If the long leg's funding spikes (e.g. 30-50%+ annualized during catalyst windows like ETF speculation) AND the short leg's funding goes negative (thinly traded perp, more shorts than longs), you pay funding on BOTH legs simultaneously.
+- At 30% annualized combined funding cost over a 12-week hold, you lose ~7% before the trade even moves against you. If your stop is -10% on the spread, funding alone could trigger it.
+
+**Time scaling — why it's worse for multi-month holds:**
+- 2-day trade on 20% annualized funding: ~0.1% cost. Negligible.
+- 6-month trade on 20% annualized funding: ~10% cost. Dominates R/R math.
+- A trade targeting +10% over 1 quarter with 5-10% net funding cost becomes net 0-5%. The thesis can be right and you still barely break even.
+
+**How to manage funding risk:**
+1. Check 30-day average funding for each leg before entering (Coinglass or venue-native funding history). Don't trust spot funding — it's noisy.
+2. Estimate total carry cost: (long_funding - short_funding) x days_held / 365. If that number is more than ~30% of your target return, the trade is structurally compromised.
+3. For long-duration RV, consider dated futures (CME, Deribit) instead of perps — fixed cost of carry baked into the basis, no surprise funding spikes.
+4. For shorter holds (4-12 weeks), perps are usually fine if you monitor weekly and exit if funding inverts persistently against you.
+5. Asymmetric funding can also be alpha — if a token's funding is paying 40% annualized to shorts during a run-up, that's a signal positioning is overcrowded long, and a contrarian short with funding tailwind becomes its own trade.
+
+**TL;DR:** Funding is a real cash cost on your P&L every hour, it scales linearly with time, and it's most dangerous on RV trades where you don't get the directional payoff to mask the bleed.
+
 ## Trade Monitoring
 
 ### Monitor If the Reason You Wrote Still Holds
